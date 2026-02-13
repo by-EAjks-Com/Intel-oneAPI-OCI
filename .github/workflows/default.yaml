@@ -73,7 +73,7 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,prefix=pr-,event=pr
-            type=match,pattern=v\d+.\d+-\d+
+            type=match,pattern=v\d+.\d+.\d+
             type=match,pattern=v\d+.\d+
             type=match,pattern=v\d+
             type=sha,prefix=sha-,format=short
@@ -127,7 +127,7 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,prefix=pr-,event=pr
-            type=match,pattern=v\d+.\d+-\d+
+            type=match,pattern=v\d+.\d+.\d+
             type=match,pattern=v\d+.\d+
             type=match,pattern=v\d+
             type=sha,prefix=sha-,format=short
@@ -185,7 +185,7 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,prefix=pr-,event=pr
-            type=match,pattern=v\d+.\d+-\d+
+            type=match,pattern=v\d+.\d+.\d+
             type=match,pattern=v\d+.\d+
             type=match,pattern=v\d+
             type=sha,prefix=sha-,format=short
