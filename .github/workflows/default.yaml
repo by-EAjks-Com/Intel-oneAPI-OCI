@@ -84,7 +84,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./Definitions/Runtime/Base/Dockerfile
+          file: ./Dockerfile.runtime-base
           tags: ${{steps.extract-metadata-runtime-base.outputs.tags}}
           labels: ${{steps.extract-metadata-runtime-base.outputs.labels}}
           push: true
@@ -138,7 +138,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./Definitions/Runtime/Core/Dockerfile
+          file: ./Dockerfile.runtime-core
           build-args: |
             IMAGE_REPOSITORY=${{env.IMAGE_REPOSITORY}}
             IMAGE_NAME=${{env.IMAGE_NAME}}
@@ -196,7 +196,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./Definitions/SDK/Core/Dockerfile
+          file: ./Dockerfile.sdk-core
           build-args: |
             IMAGE_REPOSITORY=${{env.IMAGE_REPOSITORY}}
             IMAGE_NAME=${{env.IMAGE_NAME}}

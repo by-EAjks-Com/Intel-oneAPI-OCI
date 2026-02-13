@@ -55,9 +55,9 @@ RUN apt-get update \
         doxygen=1.9.8+ds-2.1build1 \
         doxygen-latex=1.9.8+ds-2.1build1 \
         graphviz=2.42.4-3build2 \
-        intel-oneapi-common-licensing-2025.2=2025.2.0-377 \
-        intel-oneapi-dpcpp-cpp-2025.2=2025.2.1-7 \
-        libssl-dev=3.5.3-1ubuntu2 \
+        intel-oneapi-common-licensing-2025.3=2025.3.1-15 \
+        intel-oneapi-dpcpp-cpp-2025.3=2025.3.2-832 \
+        libssl-dev \
  && apt-get autoremove --yes --purge \
  && rm -rf /var/lib/apt/lists/*
 
@@ -89,9 +89,8 @@ RUN apt-mark hold \
         doxygen \
         doxygen-latex \
         graphviz \
-        intel-oneapi-common-licensing-2025.2 \
-        intel-oneapi-dpcpp-cpp-2025.2 \
-        libssl-dev
+        intel-oneapi-common-licensing-2025.3 \
+        intel-oneapi-dpcpp-cpp-2025.3
 
 # Upgrade the image with the latest patches
 
