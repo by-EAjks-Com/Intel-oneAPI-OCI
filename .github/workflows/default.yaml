@@ -140,7 +140,7 @@ jobs:
           file: ./Definitions/Runtime/Core/Dockerfile
           build-args: |
             IMAGE_REPOSITORY=${{env.IMAGE_REPOSITORY}}
-            IMAGE_NAME=${{env.IMAGE_NAME}}-runtime-base
+            IMAGE_NAME=${{env.IMAGE_NAME}}
             IMAGE_SHA=${{steps.build-and-push-runtime-base.outputs.digest}}
           tags: ${{steps.extract-metadata-runtime-core.outputs.tags}}
           labels: ${{steps.extract-metadata-runtime-core.outputs.labels}}
