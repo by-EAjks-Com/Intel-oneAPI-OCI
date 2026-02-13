@@ -1,3 +1,5 @@
-# Cpp-Only Development Environment
+# Intel oneAPI OCI
 
-Container images to compile with Intel OneAPI compilers and libraries.
+Containerized Intel oneAPI tools and libraries used at https://by-EAjks.Com.
+
+[![Build and deploy](https://github.com/by-EAjks-Com/Intel-oneAPI-OCI/actions/workflows/default.yaml/badge.svg)](https://github.com/by-EAjks-Com/Intel-oneAPI-OCI/actions/workflows/default.yaml)

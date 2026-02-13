@@ -1,5 +1,5 @@
-#   by-EAjks.Com Development Environments
-#   Copyright (C) 2025-2025 Andrea and Eric DELAGE <Contact@by-EAjks.Com>
+#   Intel oneAPI OCI
+#   Copyright (c) 2026 Andrea and Eric DELAGE <Contact@by-EAjks.Com>
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -14,50 +14,51 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-name: (CI/CD) Build and deploy the cpp-only container images
+name: Build and deploy
+
 on:
+  pull_request:
+    branches:
+      - 'main'
   push:
     branches:
       - 'main'
-      - 'feature/cpp-only/**'
-      - 'issue/cpp-only/**'
-      - 'release/cpp-only/**'
     tags:
-      - '\d+.\d+.\d+'
-    paths:
-      - '.github/workflows/build-and-push.yaml'
-      - 'Definitions/**'
+      - 'v\d+.\d+-\d+'
+
 env:
   IMAGE_REPOSITORY: eajkseajks
+  IMAGE_NAME: intel-oneapi
+
 jobs:
   build-and-push-container-images:
-    name: Build and push the container images
     permissions:
       contents: read
+      packages: write
       id-token: write
+      security-events: write
     runs-on: ubuntu-latest
-    env:
-      IMAGE_NAME: cpp-only-devenv
     steps:
-      - name: Checkout the git repository
-        uses: actions/checkout@v5.0.0
-        # https://github.com/actions/checkout/tags
-      - name: Install cosign
-        uses: sigstore/cosign-installer@v3.10.0
+      # https://github.com/actions/checkout/tags
+      - name: Checkout the Git repository
+        uses: actions/checkout@v6
+      # https://github.com/docker/setup-buildx-action/tags
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      # https://github.com/sigstore/cosign-installer/tags
+      # https://github.com/sigstore/cosign/releases
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v4.0.0
         with:
-          cosign-release: v2.6.0
-        # https://github.com/sigstore/cosign-installer/tags
-        # https://github.com/sigstore/cosign/releases
-      - name: Set up docker buildx
-        uses: docker/setup-buildx-action@v3.11.1
-        # https://github.com/docker/setup-buildx-action/tags
-      - name: Login to ${{env.IMAGE_REPOSITORY}} registry
-        uses: docker/login-action@v3.6.0
+          cosign-release: v3.0.4
+      # https://github.com/docker/login-action/tags
+      - name: Login into Docker.IO
+        uses: docker/login-action@v3
         with:
           registry: docker.io
           username: ${{secrets.DOCKER_HUB_USERNAME}}
           password: ${{secrets.DOCKER_HUB_ACCESS_TOKEN}}
-        # https://github.com/docker/login-action/tags
+      # https://github.com/docker/metadata-action/tags
       - id: extract-metadata-runtime-base
         name: Extract the ${{env.IMAGE_NAME}}-runtime-base metadata
         uses: docker/metadata-action@v5.8.0
@@ -70,23 +71,39 @@ jobs:
             prefix=,onlatest=true
             suffix=,onlatest=true
           tags: |
-            type=match,pattern=\d+.\d+.\d+
-            type=match,pattern=\d+.\d+
-            type=match,pattern=\d+
             type=ref,event=branch
             type=ref,prefix=pr-,event=pr
-        # https://github.com/docker/metadata-action/tags
+            type=match,pattern=v\d+.\d+-\d+
+            type=match,pattern=v\d+.\d+
+            type=match,pattern=v\d+
+            type=sha,prefix=sha-,format=short
+            type=raw,enable={{is_default_branch}},value=latest
+      # https://github.com/docker/build-push-action/tags
       - id: build-and-push-runtime-base
-        name: Build the ${{env.IMAGE_NAME}}-runtime-base image and push it to the ${{env.IMAGE_REPOSITORY}} registry
-        uses: docker/build-push-action@v6.18.0
+        name: Build and push the base container image
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Definitions/Runtime/Base/Dockerfile
           tags: ${{steps.extract-metadata-runtime-base.outputs.tags}}
           labels: ${{steps.extract-metadata-runtime-base.outputs.labels}}
           push: true
-        # https://github.com/docker/build-push-action/tags
-      - name: Sign the ${{env.IMAGE_NAME}}-runtime-base image with GitHub OIDC token
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      # https://github.com/aquasecurity/trivy-action/tags
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{env.IMAGE_REPOSITORY}}/${{env.IMAGE_NAME}}/base@${{steps.build-and-push.outputs.digest}}
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH,MEDIUM
+      # https://github.com/codeql-action/upload-sarif/tags
+      - name: Upload Trivy scan results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-results.sarif
+      - name: Sign the published base container image (using Cosign)
         env:
           TAGS: ${{steps.extract-metadata-runtime-base.outputs.tags}}
           DIGEST: ${{steps.build-and-push-runtime-base.outputs.digest}}
@@ -94,6 +111,9 @@ jobs:
           for TAG in ${TAGS}; do
             cosign sign --yes ${TAG}@${DIGEST}
           done
+
+
+
       - id: extract-metadata-runtime-core
         name: Extract the ${{env.IMAGE_NAME}}-runtime-core metadata
         uses: docker/metadata-action@v5.8.0
