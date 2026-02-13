@@ -65,7 +65,7 @@ jobs:
         with:
           context: workflow
           images: |
-            ${{env.IMAGE_REPOSITORY}}/${{env.IMAGE_NAME}}-runtime-base
+            ${{env.IMAGE_REPOSITORY}}/${{env.IMAGE_NAME}}/runtime/base
           flavor: |
             latest=false
             prefix=,onlatest=true
@@ -94,7 +94,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{env.IMAGE_REPOSITORY}}/${{env.IMAGE_NAME}}/base@${{steps.build-and-push.outputs.digest}}
+          image-ref: ${{env.IMAGE_REPOSITORY}}/${{env.IMAGE_NAME}}/runtime/base@${{steps.build-and-push.outputs.digest}}
           format: sarif
           output: trivy-results.sarif
           severity: CRITICAL,HIGH,MEDIUM
